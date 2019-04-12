@@ -1,0 +1,60 @@
+Problem:
+--------
+If we list all the natural numbers below 10 that are multiples of 3 or 5, we get 3, 5, 6 and 9. The sum of these multiples is 23.
+
+Find the sum of all the multiples of 3 or 5 below 1000.
+
+
+Analysis:
+---------
+Let s_i be the set of all multiples of 3 or 5 that are < i.
+Let S_i be the sum of all elements in set s_i
+s_1 = {} = s_2 = s_3; 	    S_1 = 0
+s_4 = {3} = s_5; 	    S_4 = 3
+s_6 = {3,5};		    S_6 = 8
+s_7 = {3,5,6} = s_8 = s_9;  S_7 = 14
+
+Goal: Find S_1000. 
+
+sum(s_m) = sum(s_n) + sum(s_m \ s_n)
+
+where m > n and s_m \ s_n is the set difference between s_m and s_n.
+
+So, we can find the sum(s_n+1) by adding n to sum(s_n) if n is a multiple of 3 or 5.
+
+If we define a function recursively, we can memoize and call S_1000 once. However, this would be no different from creating a for-each loop from 1 to 999 and adding each integer to a running total if the integer is a multiple of 3 or 5.
+
+Let us go back to s_1000. Each multiple of 3 in s_1000 can be expressed as 3*n (n is a natural number less than 1000 / 3) and each multiple of 5 can be expressed as 5*m (m is a natural number less than 1000 / 5). Given this thinking, let us define two more sets: s3_i and s5_i where s3_i is a the set of all multiples of 3 less than i and s5_i is the set of all multiples of 5 less than i. Note: s3_i = {3*j | for all j < i/3} and s5_i = {5*j | for all j < i/5} and s3_i U s5_i = s_i. Therefore sum(s3_i) + sum(s5_i) - sum(s3_i /^\ s5_i) = S_i. By looking at the set-builder notation definition of s3_i, sum(s3_i) is clearly equal to 3*sum({j | for all j < i/3}) and, similarly, sum(s5_i) is clearly equal to 5*sum({j | for all j < i/5}). sum({j | for all j < i/3}) = 1+2+3+...+floor(i/3) (a similar form for the other sum). This sum is the sum of a simple arithmetic series beginning with one and adding 1.
+
+Although I tried to do this to further simplify the problem, it is unnecessary. s3_i and s5_i are already simple arithmetic series and summing their elements will already be easy.
+
+S3_i = length(s3_i) * (min(s3_i) + max(s3_i)) / 2
+S5_i = length(s5_i) * (min(s5_i) + max(s5_i)) / 2
+
+The above formulations assume |s3_i| > 1 and |s5_i| > 1
+
+note that length(sj_i) = floor(i/j).
+if length = 1, Sj_i = j
+if length = 0, Sj_i = 0
+
+else
+min(sj_i) = j
+max(sj_i) = j*length(sj_i)
+
+Sj_i = length(sj_i) * (1 + length(sj_1)) * j / 2
+
+S{3,5}_1000 = S3_1000 + S5_1000 - S15_1000
+
+S3_1000:
+length = floor(1000 / 3) = 333
+S3_1000 = 333 * 334 * 3 / 2 = 166833
+
+S5_1000:
+length = floor(1000 / 5) = 200 WRONG 199
+S5_1000 = 199 * 200 * 5 / 2 = 99500
+
+S15_1000:
+length = floor(1000 / 15) = 66
+S15_1000 = 66 * 67 * 15 / 2 = 33165
+
+S_1000 = 166833 + 99500 - 33165 = 233168

@@ -26,7 +26,7 @@ def timing(f):
 # from thread https://stackoverflow.com/questions/15585493/store-the-cache-to-a-file-functools-lru-cache-in-python-3-2
 
 def cached(func):
-    func.cache = {}
+    func.cache = {(1,):2}
     @wraps(func)
     def wrapper(*args):
         try:
@@ -63,27 +63,70 @@ def prime(n):
 @timing
 def timed_prime(n):
     return prime(n)
- 
+
+def bin_serc(n, d):
+    bottom = 1
+    top = max(d.keys())[0]
+    mid = round(top / 2)
+    ptop = d[(mid,)]
+    pbot = d[(mid-1,)]
+    while ptop < n or pbot > n:
+        if ptop < n:
+            bottom = mid
+        else:
+            top = mid
+        mid = round((top + bottom) / 2)
+        ptop = d[(mid,)]
+        pbot = d[(mid-1,)]
+    return (mid - 1)
+
+
 def primes_up_to(n):
     if len(prime.cache) == 0:
-        prime(1)
+        prime(2)
     # populate from the beginning
     if max(prime.cache.values()) < n:
         start = max(prime.cache.keys())[0] + 1
         while(prime(start) < n):
             start += 1
+        return start - 1
     # find smallest prime larger than n
-    else
+    else:
+        return bin_serc(n, prime.cache)
 
-def bin_serc(n, d):
-    bottom = 1
-    top = max(prime.cache.keys())[0]
-    mid = round(top / 2)
-
-
-        
-
-        
-
+from math import ceil
 def largest_prime_factor(n):
-    n = n ** 0.5
+    i = primes_up_to(n)
+    m = round(n ** 0.5)
+    while(i > 0):
+        if n % prime.cache[(i,)] == 0:
+            return prime.cache[(i,)]
+        i -= 1
+    return n
+
+@timing
+def slow_lpf(n):
+    return largest_prime_factor(n)
+
+# Essentially, the above function finds all primes less than or equal to n
+# and finds the first prime (highest to lowest) that divides n. However,
+# This requires finding all the primes up to that number.
+
+# However, this becomes a bit ridiculous when the number in question is on the
+# order of 10^11
+
+def smallest_prime_factor(n):
+    i = 1
+    p = prime(i)
+    while(p <= n ** 0.5):
+        if n % p == 0:
+            return p
+        i += 1
+        p = prime(i)
+    return n
+
+def fast_largest_pf(n):
+    s = smallest_prime_factor(n)
+    if s == n:
+        return n
+    return fast_largest_pf(n / s)

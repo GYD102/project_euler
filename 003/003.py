@@ -130,3 +130,8 @@ def fast_largest_pf(n):
     if s == n:
         return n
     return fast_largest_pf(n / s)
+
+@timing
+def fast_lpf(n):
+    return fast_largest_pf(n)
+
